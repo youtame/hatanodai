@@ -1,0 +1,37 @@
+services:
+  app:
+    build: ./app/backend
+    restart: unless-stopped 
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - ./app/backend:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-genius}
+      - DB_PASSWORD=${DB_PASSWORD:-tensai102do}
+      - DB_NAME=${DB_NAME:-hatanodai_print_db}
+    env_file:
+      - .env
+    networks:
+      - hatanodai-network
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER:-genius}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-tensai102do}
+      - POSTGRES_DB=${DB_NAME:-hatanodai_print_db}
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+      - ./initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - hatanodai-network
+
+networks:
+  hatanodai-network:
+    driver: bridge
