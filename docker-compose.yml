@@ -19,6 +19,7 @@ services:
       - .env
     networks:
       - hatanodai-network
+    tty: true
 
   db:
     image: postgres:16-alpine

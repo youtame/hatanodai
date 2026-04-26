@@ -20,7 +20,20 @@ CREATE TABLE "session" (
 )
 WITH (OIDS=FALSE);
 
+CREATE TABLE print_pdfs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE, -- 誰のプリントか
+    file_name TEXT NOT NULL,                             -- 元のファイル名
+    r2_key TEXT UNIQUE NOT NULL,                         -- R2上の保存パス（例: users/uuid/filename.pdf）
+    file_size INTEGER,                                   -- 容量（バイト）
+    content_type TEXT DEFAULT 'application/pdf',         -- MIMEタイプ
+    ocr_status TEXT DEFAULT 'pending',                   -- pending, processing, completed, failed
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 
 DELETE FROM session WHERE expire < NOW();
 ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
 CREATE INDEX "IDX_session_expire" ON "session" ("expire");
+CREATE INDEX idx_print_pdfs_user_id ON print_pdfs(user_id);
